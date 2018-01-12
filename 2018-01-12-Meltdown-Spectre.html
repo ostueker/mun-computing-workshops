@@ -14,12 +14,21 @@
         font-weight: normal;
       }
       blockquote {
-        font-family: "Palatino Linotype", Times, Times New Roman, Georgia, serif;
+        font-family: "Palatino Linotype", Times, "Times New Roman", Georgia, serif;
         font-style: italic;
         font-size: larger; 
       }
-      
+      ul > li {-webkit-margin-after: 0.4em;}
+
+      .footnote {
+        font-size: small;
+        position: absolute;
+        left: 2em;
+        bottom: 1em;
+      }
+
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
       .small {font-size: smaller}
 
       .column:first-of-type {float:left}
@@ -34,8 +43,7 @@
       .split-60 .column:last-of-type  {width: 40%; margin-left:  1em; padding: 0 1em 0 1em}
       .split-70 .column:first-of-type {width: 70%; margin-right: 1em; padding: 0 1em 0 1em}
       .split-70 .column:last-of-type  {width: 30%; margin-left:  1em; padding: 0 1em 0 1em}
-      
-      ul > li {-webkit-margin-after: 0.4em;}
+
     </style>
   </head>
   <body>
@@ -59,7 +67,7 @@ class: center, middle
 <img src="img/meltdown.svg" alt="Meltdown Logo" width="200px" height="200px">&nbsp;
 <img src="img/spectre.svg" alt="Spectre Logo" width="200px" height="200px">
 
-
+.footnote[Logos from  <https://meltdownattack.com> & <https://spectreattack.com> used under CC0.]
 ---
 
 # Outline
@@ -126,6 +134,7 @@ y = j+k
 ```
 ]
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 class: split-60
 
@@ -166,7 +175,7 @@ y    = j+k
 ```
 ]
 
-
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 class: split-60
 
@@ -201,6 +210,7 @@ w, y = v+g, j+k
 ```
 ]
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 class: split-60
 
@@ -229,6 +239,7 @@ if v:
 ```
 ]
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 class: split-60
 
@@ -271,6 +282,7 @@ if v:
 ```
 ]
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 class: split-60
 
@@ -308,8 +320,10 @@ b = mem[1]  # 1ns
 
 ]
 
-<https://software.intel.com/en-us/articles/memory-performance-in-a-nutshell>
-<https://gist.github.com/jboner/2841832>
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>  
+with info from: <https://software.intel.com/en-us/articles/memory-performance-in-a-nutshell>  
+and <https://gist.github.com/jboner/2841832>
+]
 ---
 class: split-60
 
@@ -328,6 +342,7 @@ From Wikipedia:
 
 Spectre and Meltdown are side-channel attacks which deduce the contents of a memory location which should not normally be accessible by using timing to observe whether another, accessible, location is present in the cache.
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/> and Wikipedia]
 ---
 ## Putting it all together (1)
 
@@ -356,6 +371,7 @@ if v:
    w, x, y = w_, x_, y_      # we never get here
 ```
 
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 ## Putting it all together (2)
 
@@ -382,7 +398,7 @@ however a chunk of the **`user_mem`** array will be in the cache.
 * We can now check how fast we can access any a chunk of **`user_mem`**
   and conclude whether it was cached (fast) or not (slow).
 
-
+.footnote[Adapted from: <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>]
 ---
 ## What's at risk?
 
@@ -429,21 +445,18 @@ but not as secure as possible.
 * Security researcher have now a new angle to find unrelated, but similar attack vectors.
 
 ---
-Links
+# Links:
 
-[1] <https://meltdownattack.com/> / <https://spectreattack.com/>
+1. <https://meltdownattack.com> & <https://spectreattack.com>
+2. <http://blog.cyberus-technology.de/posts/2018-01-03-meltdown.html>  
+3. <https://googleprojectzero.blogspot.ca/2018/01/reading-privileged-memory-with-side.html>
+4. <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>
 
-[2] <http://blog.cyberus-technology.de/posts/2018-01-03-meltdown.html>  
-
-[3] <https://googleprojectzero.blogspot.ca/2018/01/reading-privileged-memory-with-side.html>
-
-[4] <https://www.raspberrypi.org/blog/why-raspberry-pi-isnt-vulnerable-to-spectre-or-meltdown/>
-
-[5] <https://xkcd.com/1938/>
 
 ---
+class: center, middle
 ![xkcd #1938 Meltdown and Spectre](https://imgs.xkcd.com/comics/meltdown_and_spectre.png)  
-Source: <https://xkcd.com/1938/>
+.footnote[Source: <https://xkcd.com/1938/>]
 ???
 New zero-day vulnerability: In addition to rowhammer, it turns out lots of servers are vulnerable to regular hammers, too.
 
