@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Computing Discussions 2018-01-12 Meltdown &amp; Spectre</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      blockquote {
+        font-family: "Palatino Linotype", Times, "Times New Roman", Georgia, serif;
+        font-style: italic;
+        font-size: larger; 
+      }
+      ul > li {-webkit-margin-after: 0.4em;}
+
+      .footnote {
+        font-size: small;
+        position: absolute;
+        left: 2em;
+        bottom: 1em;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .small {font-size: smaller}
+
+      .column:first-of-type {float:left}
+      .column:last-of-type {float:right}
+      .split-30 .column:first-of-type {width: 30%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-30 .column:last-of-type  {width: 70%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-40 .column:first-of-type {width: 40%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-40 .column:last-of-type  {width: 60%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-50 .column:first-of-type {width: 50%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-50 .column:last-of-type  {width: 50%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-60 .column:first-of-type {width: 60%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-60 .column:last-of-type  {width: 40%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-70 .column:first-of-type {width: 70%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-70 .column:last-of-type  {width: 30%; margin-left:  1em; padding: 0 1em 0 1em}
+
+      .alert-box {
+          width: 95%;
+          color:#555;
+          border-radius:10px;
+          /*font-family:Tahoma,Geneva,Arial,sans-serif;font-size:11px;*/
+          padding:0 1em 0 1em;
+          margin:10px;
+      }
+      .alert-box span {
+          font-weight:bold;
+          text-transform:uppercase;
+      }
+      .error {
+          background:#ffecec url('images/error.png') no-repeat 10px 50%;
+          border:1px solid #f5aca6;
+      }
+      .success {
+          background:#e9ffd9 url('images/success.png') no-repeat 10px 50%;
+          border:1px solid #a6ca8a;
+      }
+      .warning {
+          background:#fff8c4  ;
+          /*'&#9888' no-repeat 10px 50%;
+          content: '&#9888'; */
+          border:1px solid #f2c779;
+      }
+      .notice {
+          background:#e3f7fc url('images/notice.png') no-repeat 10px 50%;
+          border:1px solid #8ed9f6;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+Computing Discussions  
+# Un-mystifying some C/C++ & Fortran compiler flags
+### Things you should know about compilers -<br/> whether you wrote the code yourself or not.
+
+
+Friday October 19th 2018  
+by Oliver Stueker
+
+.footnote[There's something for GROMACS users as well.]
+---
+
+# Outline
+
+1. Introduction
+1. 
+
+---
+class: split-70
+
+## Introduction
+
+.column[
+* 
+]
+
+---
+class: 
+
+### Example Code (1/2):
+```C
+#include "hdf5.h"
+#include "hdf5_hl.h"
+#define RANK 2
+
+int main( void ) {
+  printf("Writing data...\n");
+
+  hid_t       file_id;
+  hsize_t     dims1[RANK]={2,3};
+  int         data1[6]={1,2,3,4,5,6};
+
+  /* create a HDF5 file */
+  file_id = H5Fcreate ("ex_lite1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  /* create and write an integer type dataset named "dset" */
+  H5LTmake_dataset(file_id,"/dset",RANK,dims1,H5T_NATIVE_INT,data1);
+  /* close file */
+  H5Fclose (file_id);
+
+...
+```
+.footnote[Example based on https://support.hdfgroup.org/HDF5/Tutor/h5lite.html (`ex_lite1.c`)]
+---
+class: 
+
+### Example Code (2/2):
+
+```C
+...
+
+  printf("Reading data...\n");
+  int         data2[6];
+  hsize_t     dims2[2];
+  size_t     i, j, nrow, n_values;
+  
+  /* open file from ex_lite1.c */
+  file_id = H5Fopen ("ex_lite1.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+  /* read dataset */
+  H5LTread_dataset_int(file_id,"/dset",data2);
+  /* get the dimensions of the dataset */
+  H5LTget_dataset_info(file_id,"/dset",dims2,NULL,NULL);
+
+  /* print it by rows */
+  n_values = (size_t)(dims2[0] * dims2[1]);
+  nrow = (size_t)dims2[1];
+  for (i=0; i&lt;n_values/nrow; i++ ) {
+    for (j=0; j&lt;nrow; j++)
+      printf ("  %d", data2[i*nrow + j]);
+    printf ("\n");
+  }
+
+  /* close file */
+  H5Fclose (file_id);
+  return 0;
+}
+```
+.footnote[Example based on https://support.hdfgroup.org/HDF5/Tutor/h5lite.html (`ex_lite2.c`)]
+---
+class:
+
+### First Try:
+
+```console
+$ module load gcc
+$ module list
+
+Currently Loaded Modules:
+  1) nixpkgs/16.09   (S)      3) StdEnv/2016.4  (S)   5) gcc/5.4.0     (t)
+  2) imkl/11.3.4.258 (math)   4) gcccore/.5.4.0 (H)   6) openmpi/2.1.1 (m)
+  
+  Where:
+   S:     Module is Sticky, requires --force to unload or purge
+   m:     MPI implementations / Implémentations MPI
+   math:  Mathematical libraries / Bibliothèques mathématiques
+   t:     Tools for development / Outils de développement
+   H:                Hidden Module
+  
+$ gcc hdf5_example_1.c 
+hdf5_example_1.c:14:18: fatal error: hdf5.h: No such file or directory
+compilation terminated.
+```
+--
+
+It can't find the `hdf5.h` header file.
+
+--
+
+What does `#include "hdf5.h"` even mean?
+
+---
+class: 
+
+### Intermezzo:
+## The C-Pre-Processor: CPP
+
+> The C-Preprocessor `cpp` processes a number of directives  
+> that are present in the source files.  
+> 
+> Modified versions if the source files are then passed to the compiler.  
+
+**Examples:**
+--
+
+```C
+#include "hdf5.h"`
+```
+--
+
+```C
+#define RANK 2
+```
+--
+
+```C
+#ifdef MPI
+#include "mpi.h"
+#endif
+```
+
+---
+class: 
+
+### The `#include` directive
+
+```C
+#include "hdf5.h"`
+```
+
+The content of the file `hdf5.h` is pasted into the source file  
+at the location of the `#include` statement.
+
+--
+
+#### When/why would I want to do that?
+--
+
+* When you need to have the same lines of code in different source files.  
+  Only need to manage a single copy instead of multiple.
+* When a single source file gets too long.  
+
+--
+
+#### Example: 
+C-Header files (`*.h`) describe the signature of public functions (API) 
+so that the compiler can check whether the right arguments are passed 
+(number, types) and whether there is a return value and if yes, of what type.
+
+--
+
+* `#include "hdf5.h" ` &rArr; starts looking relative to the current file
+* `#include <stdio.h>` &rArr; starts looking in system directories
+
+---
+class: 
+
+### The `#define` directive
+If the preprocessor encounters:
+```C
+#define TABLE_SIZE 100
+int table1[TABLE_SIZE];
+int table2[TABLE_SIZE]; 
+```
+... it will pass it to the compiler as:
+```C
+int table1[100];
+int table2[100]; 
+```
+Note: TABLE_SIZE is not a variable!
+
+--
+
+#### Can also be used to define macros:
+```C
+#define getmax(a,b) ((a)>(b)?(a):(b))
+int main() {
+  int x=5, y;
+  y= getmax(x,2);
+  cout << y << endl;
+  return 0; 
+}```
+
+---
+class: split-50
+### Conditional inclusions
+
+.column[
+#### `#ifdef` and `#ifndef`
+
+Include file `mpi.h` only if name MPI has been defined:
+```C
+#ifdef MPI
+#include "mpi.h"
+#endif
+```
+Using `cpp -DMPI` or `gcc -DMPI` 
+will define `MPI`.
+
+----
+
+If `TABLE_SI  ZE` has not been previously defined, define it as 100:
+```C
+#ifndef TABLE_SIZE
+#define TABLE_SIZE 100
+#endif
+int table[TABLE_SIZE];
+```
+]
+.column[
+----
+#### `#if`, `#endif`, `#else` and `#elif`
+
+Truncate `TABLE_SIZE` to values between 50 and 200:
+```cpp
+#if TABLE_SIZE&gt;200
+#undef TABLE_SIZE
+#define TABLE_SIZE 200
+
+#elif TABLE_SIZE&lt;50
+#undef TABLE_SIZE
+#define TABLE_SIZE 50
+
+#else
+#undef TABLE_SIZE
+#define TABLE_SIZE 100
+#endif
+
+int table[TABLE_SIZE]; 
+```
+]
+
+---
+class: 
+### What does that have to do with GROMACS?
+--
+
+Ever noticed the following in your `topol.top` file?
+```console
+[...]
+; Include forcefield parameters
+#include "oplsaa.ff/forcefield.itp"
+
+; Include chain topologies
+#include "topol_LDH.itp"
+
+; Include water topology
+#include "oplsaa.ff/tip3p.itp"
+
+#ifdef POSRES_WATER
+; Position restraint for each water oxygen
+[ position_restraints ]
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif
+[...]
+```
+--
+
+And "`define = -DPOSRES`" line in your `.mdp` file?
+
+--
+
+GROMACS uses Preprocessor directives within `grompp` to piece-together
+a "grand" Forcefield/Topology file (``.top`) from a number of smaller `.itp`
+(Included ToPology) files.
+
+---
+class: 
+
+### So where the header files?
+```console
+$ ll
+total 993
+-rw-r----- 1 stuekero hdf5_example_1.c
+lrwxrwxrwx 1 stuekero HDF5_gcc -> /cvmfs/.../gcc5.4/hdf5/1.10.1
+lrwxrwxrwx 1 stuekero HDF5_intel -> /cvmfs/.../intel2016.4/hdf5/1.8.18
+```
+--
+
+```console
+$ ls HDF5_gcc/include/hdf5*h
+HDF5_gcc/include/hdf5.h  HDF5_gcc/include/hdf5_hl.h
+```
+--
+
+```console
+$ gcc -IHDF5_gcc/include  hdf5_example_1.c 
+/tmp/ccEPK9Kf.o: In function `main':
+hdf5_example_1.c:(.text+0x5f): undefined reference to `H5check_version'
+hdf5_example_1.c:(.text+0x64): undefined reference to `H5open'
+hdf5_example_1.c:(.text+0x7d): undefined reference to `H5Fcreate'
+[...]
+collect2: error: ld returned 1 exit status
+```
+
+#### At least we now get a different error message.
+
+
+---
+class: split-50
+### Summary of the C Preprocessor
+
+.column[
+#### Preprocessor Flags:
+
+Flags can be used with `cpp`  
+or the compiler  
+(which then are passed to `cpp`)
+
+* `-I` - additional `incude` directory
+    * `-I/path/to/dir/include`
+* `-D` - define names on the commandline (instead of `#define`)
+    * `-DMYDEFINITION`
+    * `-DNUMDIM=3`
+]
+
+.column[
+----
+#### Preprocessor Directives:
+
+* `#include`
+* `#define`
+* `#ifdef`
+* `#ifndef`
+* `#if`
+* `#endif`
+* `#else`
+* `#elif`
+]
+
+
+---
+class: 
+
+### Let's look at the error again:
+
+```console
+$ gcc -IHDF5_gcc/include  hdf5_example_1.c 
+/tmp/ccEPK9Kf.o: In function `main':
+hdf5_example_1.c:(.text+0x5f): undefined reference to `H5check_version'
+hdf5_example_1.c:(.text+0x64): undefined reference to `H5open'
+[...]
+collect2: error: ld returned 1 exit status
+```
+--
+#### This is not a compiler error!
+--
+
+#### This is an error from the Linker `ld`!
+
+---
+class: 
+### Intermezzo:
+## The Linker: ld
+
+> ld combines a number of object and archive files, relocates their data 
+> and ties up symbol references. Usually the last step in compiling a 
+> program is to run ld.
+.footnote[from gnu linker ld Documentation (GNU Binutils) <https://sourceware.org/binutils/docs-2.27/ld/>]
+
+--
+
+Can we use our compiler to just generate the "object file" and stop?
+
+---
+class: 
+### Compiling just the Object:
+
+`gcc` has an option `-c` "Compile and assemble, but do not link"
+
+Let's try that:
+
+--
+```console
+$ ls
+hdf5_example_1.c  HDF5_gcc  HDF5_intel
+```
+--
+```console
+$ gcc  -c  -I HDF5_gcc/include/   hdf5_example_1.c 
+```
+--
+```console
+$ ls
+hdf5_example_1.c  hdf5_example_1.o  HDF5_gcc  HDF5_intel
+```
+
+---
+class: 
+### Linking by hand
+
+```console
+$ ld -o hdf_example.exe  -emain \
+     hdf5_example_1.o           \
+     HDF5_gcc/lib/libhdf5.so    \
+     HDF5_gcc/lib/libhdf5_hl.so
+
+$ ls *.exe
+hdf_example.exe
+```
+
+--
+
+or with gcc:
+```console
+$ gcc -o hdf_example.exe         \
+      hdf5_example_1.o           \
+      HDF5_gcc/lib/libhdf5.so    \
+      HDF5_gcc/lib/libhdf5_hl.so
+```
+
+--
+
+We can refer to the external libraries using a different notation:
+```console
+$ gcc -o hdf_example.exe         \
+      hdf5_example_1.o           \
+      -l hdf5  -l hdf5_hl        \
+      -L HDF5_gcc/lib/
+```
+
+---
+class: 
+### Let's run the program:
+
+```console
+$ ./hdf_example.exe 
+./hdf_example.exe: error while loading shared libraries: libhdf5.so.101: 
+      cannot open shared object file: No such file or directory
+```
+---
+class:
+#### Option 1: `LD_LIBRARY_PATH`
+
+```console
+$ echo $LD_LIBRARY_PATH 
+/opt/software/slurm/lib
+
+# export LD_LIBRARY_PATH="./HDF5_gcc/lib:$LD_LIBRARY_PATH"
+# better:
+$ export LD_LIBRARY_PATH="$PWD/HDF5_gcc/lib:$LD_LIBRARY_PATH"
+
+$ ./hdf_example.exe 
+Writing data...
+Reading data...
+  1  2  3
+  4  5  6
+```
+--
+
+> In Linux, the environment variable LD_LIBRARY_PATH is a colon-separated 
+> set of directories where libraries should be searched for first, before 
+> the standard set of directories[...].
+
+--
+
+.alert-box.warning[
+Don't just overwrite your `LD_LIBRARY_PATH` as other programs might rely on
+the libraries in those directories.  
+Instead expand it by keeping the original PATH at the end.
+]
+
+---
+class: 
+#### Option 2: RUNPATH
+
+```console
+-Wl,-rpath,$(pwd -P)/HDF5_gcc/lib
+```
+
+---
+class: split-40
+
+## All In One
+
+.column[
+```console
+$ gcc hdf5_example_1.c     \
+     -D RANK=2             \
+     -I HDF5_gcc/include/  \
+     -l hdf5  -l hdf5_hl   \
+     -L HDF5_gcc/lib/      \
+     -o hdf_example.exe    
+```
+]
+--
+.column[
+----
+```
+compiler:     the source file
+preprocessor: instead of #define within source
+preprocessor: location of header-files
+linker:       which libraries to link
+linker:       where to find libraries
+linker:       name of the output file
+```
+]
+
+---
+class: 
+
+```console
+
+```
+
+---
+class: 
+
+# And now with Intel Compiler
+
+.column[
+```console
+$ module purge
+$ module list
+
+Currently Loaded Modules:
+  1) nixpkgs/16.09   (S)   4) ifort/.2016.4.258 (H)      7) openmpi/2.1.1 (m)
+  2) icc/.2016.4.258 (H)   5) intel/2016.4      (t)      8) StdEnv/2016.4 (S)
+  3) gcccore/.5.4.0  (H)   6) imkl/11.3.4.258   (math)
+  
+$ icc hdf5_example_1.c 
+
+/tmp/icc2HiSwn.o: In function `main':
+hdf5_example_1.c:(.text+0x68): undefined reference to `H5check_version'
+hdf5_example_1.c:(.text+0x7b): undefined reference to `H5Fcreate'
+hdf5_example_1.c:(.text+0x82): undefined reference to `H5open'
+hdf5_example_1.c:(.text+0x9a): undefined reference to `H5T_NATIVE_INT_g'
+hdf5_example_1.c:(.text+0xa3): undefined reference to `H5LTmake_dataset'
+hdf5_example_1.c:(.text+0xaa): undefined reference to `H5Fclose'
+hdf5_example_1.c:(.text+0xc8): undefined reference to `H5check_version'
+hdf5_example_1.c:(.text+0xd6): undefined reference to `H5Fopen'
+hdf5_example_1.c:(.text+0xe9): undefined reference to `H5LTread_dataset_int'
+hdf5_example_1.c:(.text+0xff): undefined reference to `H5LTget_dataset_info'
+hdf5_example_1.c:(.text+0x1aa): undefined reference to `H5Fclose'
+```
+]
+---
+class: 
+
+---
+class: 
+
+
+---
+class: 
+## Conclusion
+
+* 
+
+    </textarea>
+    <script src="remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
