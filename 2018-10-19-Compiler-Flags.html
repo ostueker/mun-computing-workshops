@@ -93,17 +93,26 @@ by Oliver Stueker
 
 # Outline
 
-1. Introduction
-1. 
-
+1. Motivation
+1. Example Code
+1. The C-Pre-Processor: `cpp`
+   1. Preprocessor directives
+   1. What does that have to do with GROMACS?
+1. The Linker: `ld`
+   1. Compiling just the Object
+   1. Linking by hand
+   1. Shared object dependencies
+   1. LD_LIBRARY_PATH
+   1. rpath
+1. Putting it all together
+1. Comparing `gcc` and `icc`
+1. Conclusion
 ---
-class: split-70
 
-## Introduction
+## Motivation
 
-.column[
-* 
-]
+> I've downloaded this code/program but when I try to compile it, 
+> it gives this error that I don't understand.
 
 ---
 class: 
@@ -201,8 +210,8 @@ What does `#include "hdf5.h"` even mean?
 ---
 class: 
 
-### Intermezzo:
-## The C-Pre-Processor: CPP
+### Intermezzo 1:
+## The C-Pre-Processor: `cpp`
 
 > The C-Preprocessor `cpp` processes a number of directives  
 > that are present in the source files.  
@@ -460,8 +469,8 @@ collect2: error: ld returned 1 exit status
 
 ---
 class: 
-### Intermezzo:
-## The Linker: ld
+### Intermezzo 2:
+## The Linker: `ld`
 
 > ld combines a number of object and archive files, relocates their data 
 > and ties up symbol references. Usually the last step in compiling a 
@@ -538,9 +547,24 @@ $ ./hdf_example.exe
 ./hdf_example.exe: error while loading shared libraries: libhdf5.so.101: 
       cannot open shared object file: No such file or directory
 ```
+
+--
+
+#### Intermezzo 3:
+### ldd - print shared object dependencies
+
+```console
+$ ldd hdf_example.exe 
+	linux-vdso.so.1 (0x00002b2108ffe000)
+	libhdf5.so.101 => not found
+	libhdf5_hl.so.100 => not found
+	libc.so.6 => /cvmfs/.../lib/libc.so.6 (0x00002b2109200000)
+	/cvmfs/.../lib/ld-linux-x86-64.so.2 (0x00002b2108fdb000)
+```
+
 ---
 class:
-#### Option 1: `LD_LIBRARY_PATH`
+### Option 1: `LD_LIBRARY_PATH`
 
 ```console
 $ echo $LD_LIBRARY_PATH 
@@ -572,16 +596,58 @@ Instead expand it by keeping the original PATH at the end.
 
 ---
 class: 
-#### Option 2: RUNPATH
+### Option 2: rpath (RUNPATH)
+
+> **rpath** (RUNPATH) designates the run-time search path hard-coded in an 
+> executable file  or library. 
+> Dynamic linking loaders use the rpath to find required libraries.
 
 ```console
--Wl,-rpath,$(pwd -P)/HDF5_gcc/lib
+$ export LD_LIBRARY_PATH="/opt/software/slurm/lib"
+
+$ gcc -o hdf_example.exe         \
+      hdf5_example_1.o           \
+      -l hdf5  -l hdf5_hl        \
+      -L HDF5_gcc/lib/           \
+      -Wl,-rpath,$(pwd -P)/HDF5_gcc/lib
+
+$ ./hdf_example.exe 
+Writing data...
+Reading data...
+  1  2  3
+  4  5  6
 ```
+--
+The *rpath* is added to the executable:
+```console
+$ objdump -a -x hdf_example.exe | grep RUNPATH
+  RUNPATH    /project/6002406/tutorial/hdf5/HDF5_gcc/lib:$ORIGIN/../lib:&#x21B4;
+           &#x21B3;$ORIGIN/../lib64:/cvmfs/.../var/nix/profiles/gcc-5.4.0/lib64
+```
+
+---
+
+### Let's look again with `ldd`:
+
+```console
+$ ldd hdf_example.exe 
+  linux-vdso.so.1 (0x00002add168d8000)
+  libhdf5.so => /project/.../HDF5_gcc/lib/libhdf5.so (0x00002add16ada000)
+  libhdf5_hl.so => /project/.../HDF5_gcc/lib/libhdf5_hl.so (0x00002add1702e000)
+  libc.so.6 => /cvmfs/.../lib/libc.so.6 (0x00002add17250000)
+  libz.so.1 => /cvmfs/.../lib/libz.so.1 (0x00002add175ee000)
+  libdl.so.2 => /cvmfs/.../lib/libdl.so.2 (0x00002add17804000)
+  libm.so.6 => /cvmfs/.../lib/libm.so.6 (0x00002add17a08000)
+  libpthread.so.0 => /cvmfs/.../lib/libpthread.so.0 (0x00002add17d0d000)
+  /cvmfs/.../lib/ld-linux-x86-64.so.2 (0x00002add168b5000)
+```
+
+Now all libraries are found.
 
 ---
 class: split-40
 
-## All In One
+## Putting it all together
 
 .column[
 ```console
@@ -590,72 +656,137 @@ $ gcc hdf5_example_1.c     \
      -I HDF5_gcc/include/  \
      -l hdf5  -l hdf5_hl   \
      -L HDF5_gcc/lib/      \
-     -o hdf_example.exe    
+     -o hdf_example.exe    \
+  -Wl,-rpath,$(pwd)/HDF5_gcc/lib
 ```
 ]
 --
 .column[
 ----
-```
+```plain
 compiler:     the source file
-preprocessor: instead of #define within source
+preprocessor: instead of #define in source
 preprocessor: location of header-files
 linker:       which libraries to link
 linker:       where to find libraries
 linker:       name of the output file
+linker:       set rpath
 ```
 ]
 
+--
+<br clear="all"/>
+
+Let's look at: **`-Wl,-rpath,$(pwd)/HDF5_gcc/lib`**:
+
+* `-Wl`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &rArr;&nbsp;&nbsp;pass the following option to the linker.
+* `-rpath`&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &rArr;&nbsp;&nbsp; add to the rpath...
+* `$(pwd)/HDF5_gcc/lib`&nbsp;&nbsp;&rArr;&nbsp;&nbsp;...this directory
+
 ---
 class: 
 
-```console
+### But what are the benefits of separating Compilation from Linking?
 
-```
+* Imagine finding something in a source-file that has 500'000 lines of code.  
+--
+
+  * &rarr; split it into ~500 files with ~1000 lines each.
+--
+
+* Now imagine compliling the whole thing takes 5 minutes.  
+--
+
+  * You change a single file.  
+--
+
+  * Do you really have to re-compile everything?  
+--
+
+  * I.e. wait 5 min to be able to test?  
+
+--
+  * &rarr; Just re-comlile the files that have changed...  
+
+--
+  * &rarr; ...and link them to a new binary.
+
+--
+
+* You can write a `Makefile` to do just that.
+
+--
+
+#### This will be the topic for another workshop.
 
 ---
-class: 
-
 # And now with Intel Compiler
 
-.column[
 ```console
 $ module purge
 $ module list
-
 Currently Loaded Modules:
   1) nixpkgs/16.09   (S)   4) ifort/.2016.4.258 (H)      7) openmpi/2.1.1 (m)
   2) icc/.2016.4.258 (H)   5) intel/2016.4      (t)      8) StdEnv/2016.4 (S)
   3) gcccore/.5.4.0  (H)   6) imkl/11.3.4.258   (math)
-  
-$ icc hdf5_example_1.c 
-
-/tmp/icc2HiSwn.o: In function `main':
-hdf5_example_1.c:(.text+0x68): undefined reference to `H5check_version'
-hdf5_example_1.c:(.text+0x7b): undefined reference to `H5Fcreate'
-hdf5_example_1.c:(.text+0x82): undefined reference to `H5open'
-hdf5_example_1.c:(.text+0x9a): undefined reference to `H5T_NATIVE_INT_g'
-hdf5_example_1.c:(.text+0xa3): undefined reference to `H5LTmake_dataset'
-hdf5_example_1.c:(.text+0xaa): undefined reference to `H5Fclose'
-hdf5_example_1.c:(.text+0xc8): undefined reference to `H5check_version'
-hdf5_example_1.c:(.text+0xd6): undefined reference to `H5Fopen'
-hdf5_example_1.c:(.text+0xe9): undefined reference to `H5LTread_dataset_int'
-hdf5_example_1.c:(.text+0xff): undefined reference to `H5LTget_dataset_info'
-hdf5_example_1.c:(.text+0x1aa): undefined reference to `H5Fclose'
 ```
+--
+```console
+$ icc hdf5_example_1.c     -DRANK=2        -IHDF5_intel/include/ \
+     -lhdf5                -lhdf5_hl       -LHDF5_intel/lib/     \
+     -ohdf_example.exe     -Wl,-rpath,$(pwd)/HDF5_intel/lib
+
+$ ./hdf_example.exe 
+Writing data...
+Reading data...
+  1  2  3
+  4  5  6
+```
+--
+
+This is what we used for `gcc`:
+```console
+$ gcc hdf5_example_1.c     -DRANK=2        -IHDF5_gcc/include/   \
+     -lhdf5                -lhdf5_hl       -LHDF5_gcc/lib/       \
+     -ohdf_example.exe     -Wl,-rpath,$(pwd)/HDF5_gcc/lib
+```
+
+
+---
+class: 
+## Summary
+
+* Compiling a program has different stages:
+  * Preprocessing &rArr; Compiling &rArr; Linking
+* We can pass options to the Preprocessor:
+  * `-D`  definitions
+  * `-I`  location of `include` files
+    * can be passed via environment variable `CPATH`
+  * This works with all kind of textfiles (e.g. Gromacs topologies)
+* We can pass options to the Linker:
+  * `-l`  which libraries to link
+  * `-L`  where those libraries can be found
+    * can be passed via environment variable `LIBRARY_PATH`
+* Resolve shared object dependencies during runtime:
+  * use `ldd` to list shared object dependencies
+  * either set `LD_LIBRARY_PATH`  (good for debugging)
+  * better set *rpath* in the executable or library
+* Works the same with most C, C++, Fortran compilers
+
+---
+class:
+## Summary (2)
+
+.center[
+<br>
+<br>
+<br>
+<br>
+<br>
+### This presentation wasn't at all about compilers.
 ]
----
-class: 
-
----
-class: 
-
-
----
-class: 
-## Conclusion
-
-* 
 
     </textarea>
     <script src="remark-latest.min.js" type="text/javascript">
