@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Computing Discussions 2018-01-12 Meltdown &amp; Spectre</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      blockquote {
+        font-family: "Palatino Linotype", Times, "Times New Roman", Georgia, serif;
+        font-style: italic;
+        font-size: larger; 
+      }
+      ul > li {-webkit-margin-after: 0.4em;}
+
+      .footnote {
+        font-size: small;
+        position: absolute;
+        left: 2em;
+        bottom: 1em;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .small {font-size: smaller}
+
+      .column:first-of-type {float:left}
+      .column:last-of-type {float:right}
+      .split-30 .column:first-of-type {width: 30%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-30 .column:last-of-type  {width: 70%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-40 .column:first-of-type {width: 40%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-40 .column:last-of-type  {width: 60%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-50 .column:first-of-type {width: 50%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-50 .column:last-of-type  {width: 50%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-60 .column:first-of-type {width: 60%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-60 .column:last-of-type  {width: 40%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-70 .column:first-of-type {width: 70%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-70 .column:last-of-type  {width: 30%; margin-left:  1em; padding: 0 1em 0 1em}
+
+      .alert-box {
+          width: 95%;
+          color:#555;
+          border-radius:10px;
+          /*font-family:Tahoma,Geneva,Arial,sans-serif;font-size:11px;*/
+          padding:0 1em 0 1em;
+          margin:10px;
+      }
+      .alert-box span {
+          font-weight:bold;
+          text-transform:uppercase;
+      }
+      .error {
+          background:#ffecec url('images/error.png') no-repeat 10px 50%;
+          border:1px solid #f5aca6;
+      }
+      .success {
+          background:#e9ffd9 url('images/success.png') no-repeat 10px 50%;
+          border:1px solid #a6ca8a;
+      }
+      .warning {
+          background:#fff8c4  ;
+          /*'&#9888' no-repeat 10px 50%;
+          content: '&#9888'; */
+          border:1px solid #f2c779;
+      }
+      .notice {
+          background:#e3f7fc url('images/notice.png') no-repeat 10px 50%;
+          border:1px solid #8ed9f6;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+Computing Discussions  
+# Git Q&amp;A
+
+
+Friday February 15th 2019  
+by Oliver Stueker
+
+.footnote[There's something for GROMACS users as well.]
+---
+
+# What are your Git concerns, questions, etc.?
+
+---
+
+# GUIs for Git:
+
+* Sourcetree     https://www.sourcetreeapp.com/  
+  (available for Mac & Windows)
+* GitKraken      https://www.gitkraken.com      
+  (available for Mac, Windows, Linux)
+* GitHub Desktop https://desktop.github.com/    
+  (available for Mac & Windows)
+
+---
+# Links:
+
+* Official Documentation
+    * Pro Git (free ebook): https://git-scm.com/book
+    * Git Reference Manual: http://git-scm.com/docs
+* Cheat Sheets:
+    * Interactive Git Cheatsheet http://ndpsoftware.com/git-cheatsheet.html
+    * https://about.gitlab.com/images/press/git-cheat-sheet.pdf
+    * https://www.git-tower.com/blog/git-cheat-sheet/
+* Interactive Sandbox:
+    * Guided Tutorial: https://pcottle.github.io/learnGitBranching/
+    * Git Playground: https://pcottle.github.io/learnGitBranching/?NODEMO
+* Blogs:
+    * http://stevelosh.com/blog/2013/04/git-koans/
+    * http://sourcephile.blogspot.com/2018/05/how-i-use-git.html
+* Videos:
+    * Video tutorials: http://git-scm.com/videos
+    * [Git for Ages 4 And Up](https://www.youtube.com/watch?v=1ffBJ4sVUb4)
+
+---
+## PhD Comics "notFinal.doc"
+.center[
+<a href="http://phdcomics.com/comics/archive.php?comicid=1531">
+<img height="500" width="400" src="http://www.phdcomics.com/comics/archive/phd101212s.gif">
+</a>
+]
+---
+## XKCD #1296 "Git Commit"
+
+.center[
+[![](https://imgs.xkcd.com/comics/git_commit.png)](http://xkcd.com/1296/)
+
+Merge branch ‘asdfasjkfdlas/alkdjf’ into sdkjfls-final
+]
+
+---
+class: split-50
+
+## XKCD #1597 "Git"
+
+.column[
+[![](https://imgs.xkcd.com/comics/git.png)](http://xkcd.com/1597/)
+]
+.column[
+<br/>
+If that doesn’t fix it, git.txt contains the phone number of a friend of mine who understands git. Just wait through a few minutes of ‘It’s really pretty simple, just think of branches as…’ and eventually you’ll learn the commands that will fix everything.
+]
+
+    </textarea>
+    <script src="remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
