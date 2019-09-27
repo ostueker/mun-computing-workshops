@@ -26,6 +26,21 @@
         left: 2em;
         bottom: 1em;
       }
+      table { 
+          width: 80%;
+          border: none; 
+          border-collapse: collapse; 
+      }
+      td,th { 
+          border-left: 1px solid #000; 
+          padding-left:  1em;
+      }
+      th {
+          border-bottom: 1px solid #000;
+      }
+      td:first-child, th:first-child {
+          border-left: none; 
+       }
 
       .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
 
@@ -95,23 +110,29 @@ Memory:
 * RAM
 * DRAM 
 * DDR1, ... DDR4 RAM
-...all basically mean the same 
---
+
+...all these basically mean the same 
+
 Examples for Storage:
 * Hard Disk Drives (HDD)
---
 * Solid State Drives (SSD)
---
 * Optical Media (CD-ROM, DVD, Bluray, ...)
---
 * Flash-Memory (USB sticks)
---
 * Tape
 
 ---
 
-## Datatypes Units of storage
+## Data-types and Units of storage
 
+### A selection of common data-types
+
+name             | abbr   | size [bit] | size [byte]
+---------------- | ------ | ---------- | -----------
+character        | char   |      8     |      1 
+integer          | int    |     32     |      4 
+long integer     | long   |     64     |      8 
+floating point   | float  |     32     |      4 
+double precision | double |     64     |      8 
 
 ---
 ## Example: Gaussian using localscatch
@@ -208,15 +229,23 @@ MyCoolMolecule
 ```
 
 ---
+class: split-50
 ### Implications of using high-memory jobs: Core Equivalents
-![](https://docs.computecanada.ca/mediawiki/images/c/c9/Core_equivalent_diagram_GP.png)
-Core Equivalent diagram
+
+<img height="150px"  src="https://docs.computecanada.ca/mediawiki/images/c/c9/Core_equivalent_diagram_GP.png" />
+<br/>Core Equivalent diagram
+<hr>
 --
-![](https://docs.computecanada.ca/mediawiki/images/1/18/Two_core_equivalents.png)
-Two Core Equivalents
+.column[
+<img height="150px"  src="https://docs.computecanada.ca/mediawiki/images/1/18/Two_core_equivalents.png" />
+<br/>2 Core Equivalents
+]
 --
-![](https://docs.computecanada.ca/mediawiki/images/9/90/Two_and_a_half_core_equivalents.png)
-2.5 Core Equivalents
+.column[
+<img height="150px"  src="https://docs.computecanada.ca/mediawiki/images/9/90/Two_and_a_half_core_equivalents.png" />
+<br/>2.5 Core Equivalents
+]
+[https://docs.computecanada.ca/wiki/Allocations_and_resource_scheduling](https://docs.computecanada.ca/wiki/Allocations_and_resource_scheduling#What_is_a_core_equivalent_and_how_is_it_used_by_the_scheduler.3F)
 ---
 
 ## XKCD #2207 "Math Work"
