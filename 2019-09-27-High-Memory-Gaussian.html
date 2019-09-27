@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Computing Workshops 2019-09-27 High Memory Jobs</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      blockquote {
+        font-family: "Palatino Linotype", Times, "Times New Roman", Georgia, serif;
+        font-style: italic;
+        font-size: larger; 
+      }
+      ul > li {-webkit-margin-after: 0.4em;}
+
+      .footnote {
+        font-size: small;
+        position: absolute;
+        left: 2em;
+        bottom: 1em;
+      }
+
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+      .small {font-size: smaller}
+
+      .column:first-of-type {float:left}
+      .column:last-of-type {float:right}
+      .split-30 .column:first-of-type {width: 30%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-30 .column:last-of-type  {width: 70%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-40 .column:first-of-type {width: 40%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-40 .column:last-of-type  {width: 60%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-50 .column:first-of-type {width: 50%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-50 .column:last-of-type  {width: 50%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-60 .column:first-of-type {width: 60%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-60 .column:last-of-type  {width: 40%; margin-left:  1em; padding: 0 1em 0 1em}
+      .split-70 .column:first-of-type {width: 70%; margin-right: 1em; padding: 0 1em 0 1em}
+      .split-70 .column:last-of-type  {width: 30%; margin-left:  1em; padding: 0 1em 0 1em}
+
+      .alert-box {
+          width: 95%;
+          color:#555;
+          border-radius:10px;
+          /*font-family:Tahoma,Geneva,Arial,sans-serif;font-size:11px;*/
+          padding:0 1em 0 1em;
+          margin:10px;
+      }
+      .alert-box span {
+          font-weight:bold;
+          text-transform:uppercase;
+      }
+      .error {
+          background:#ffecec url('images/error.png') no-repeat 10px 50%;
+          border:1px solid #f5aca6;
+      }
+      .success {
+          background:#e9ffd9 url('images/success.png') no-repeat 10px 50%;
+          border:1px solid #a6ca8a;
+      }
+      .warning {
+          background:#fff8c4  ;
+          /*'&#9888' no-repeat 10px 50%;
+          content: '&#9888'; */
+          border:1px solid #f2c779;
+      }
+      .notice {
+          background:#e3f7fc url('images/notice.png') no-repeat 10px 50%;
+          border:1px solid #8ed9f6;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+Computing Workshops  
+# High Memory Jobs
+
+
+Friday September 27th 2019  
+by Oliver Stueker
+
+---
+
+### Let's first talk about the difference between "Storage" and "Memory" 
+
+Examples for Storage:
+* Hard Disk Drives (HDD)
+* Solid State Drives (SSD)
+* Optical Media (CD-ROM, DVD, Bluray, ...)
+* Flash-Memory (USB sticks)
+* Tape
+
+Memory:
+* RAM
+* DRAM 
+* DDR1, ... DDR4 RAM
+
+all basically mean the same 
+
+---
+
+## Datatypes Units of storage
+
+
+---
+## Example: Gaussian using localscatch
+
+Jobscript:
+```bash
+#!/bin/bash
+#SBATCH --mem-per-cpu=16G     # memory-per-cpu
+#SBATCH --cpus-per-task=2     # cpus as defined by %nprocs
+#SBATCH --time=03-00:00       # expect run time (DD-HH:MM)
+module load gaussian/g09.e01 
+# use localscatch:
+export GAUSS_SCRDIR=$SLURM_TMPDIR
+
+g09 < mycoolmolecule.gjf  > mycoolmolecule.log
+```
+
+
+mycoolmolecule.gjf:
+```
+%NprocShared=2
+%MEM=30GB
+%CHK=mycoolmolecule.chk
+#N MP2/6-31G(d)  OPT  FREQ MaxDisk=400GB
+
+MyCoolMolecule
+
+0  1
+ C    0.         0.         0.
+...
+```
+
+---
+## Example: Gaussian using (net)scatch
+
+Jobscript:
+```bash
+#!/bin/bash
+#SBATCH --mem-per-cpu=16G     # memory-per-cpu
+#SBATCH --cpus-per-task=2     # cpus as defined by %nprocs
+#SBATCH --time=03-00:00       # expect run time (DD-HH:MM)
+module load gaussian/g09.e01 
+# use ~/scratch:
+export GAUSS_SCRDIR=/scratch/$USER
+
+g09 < mycoolmolecule.gjf  > mycoolmolecule.log
+```
+
+
+mycoolmolecule.gjf:
+```
+%NprocShared=2
+%MEM=30GB
+%CHK=mycoolmolecule.chk
+#N MP2/6-31G(d) OPT FREQ MaxDisk=400GB
+
+MyCoolMolecule
+
+0  1
+ C    0.         0.         0.
+...
+```
+
+
+---
+## Example: Gaussian restart
+
+Jobscript:
+```bash
+#!/bin/bash
+#SBATCH --mem-per-cpu=16G     # memory-per-cpu
+#SBATCH --cpus-per-task=2     # cpus as defined by %nprocs
+#SBATCH --time=03-00:00       # expect run time (DD-HH:MM)
+module load gaussian/g09.e01 
+# use localscatch:
+export GAUSS_SCRDIR=/scratch/$USER
+
+g09 < mycoolmolecule_restart.gjf  > mycoolmolecule_restart.log
+```
+
+mycoolmolecule.gjf:
+```
+%RWF=/scratch/user/mycoolmolecule_mp2.rwf
+%NoSave
+%nprocshared=2
+%mem=30GB
+%OldCHK=mycoolmolecule.chk
+%CHK=mycoolmolecule_restart.chk
+#N MP2/6-31G(d)  FREQ  MaxDisk=400GB  geom=Checkpoint
+
+MyCoolMolecule
+
+0  1
+```
+
+---
+### Implications of using high-memory jobs: Core Equivalents
+![](https://docs.computecanada.ca/mediawiki/images/c/c9/Core_equivalent_diagram_GP.png)
+Core Equivalent diagram
+--
+![](https://docs.computecanada.ca/mediawiki/images/1/18/Two_core_equivalents.png)
+Two Core Equivalents
+--
+![](https://docs.computecanada.ca/mediawiki/images/9/90/Two_and_a_half_core_equivalents.png)
+2.5 Core Equivalents
+---
+
+## XKCD #2207 "Math Work"
+
+[![](https://imgs.xkcd.com/comics/math_work.png)](http://xkcd.com/2207/)
+<br/>
+I could type this into a solver, which MIGHT help, but would also mean I have to get a lot of parentheses right...
+
+    </textarea>
+    <script src="remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
