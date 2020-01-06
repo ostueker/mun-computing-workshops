@@ -1,2 +1,8 @@
 remark-develop/*
 boilerplate*.html
+**/.ipynb_checkpoints/*
+**/.vscode/
+
+# ignore for now:
+# */*.ipynb
+weather_logger/
