@@ -7,3 +7,4 @@ the Computing-Workshops series at Memorial University.
 * [2018-10-12 De-mystifying compiler flags](https://ostueker.github.io/mun-computing-workshops/2018-10-19-Compiler-Flags.html)
 * [2019-02-15 Git Q&A](https://ostueker.github.io/mun-computing-workshops/2019-02-15-Git-QandA.html)
 * [2019-09-27 High Memory Jobs](https://ostueker.github.io/mun-computing-workshops/2019-09-27-High-Memory-Gaussian.html)
+* [2020-01-10 Image-file-formats](https://ostueker.github.io/mun-computing-workshops/2020-01-10_Image-file-formats/)
