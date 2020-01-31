@@ -144,18 +144,20 @@ by Oliver Stueker
       - (255, 0, 0) = `xFF0000` : red
       - (0, 255, 0) = `x00FF00` : green
       - (0, 0, 255) = `x0000FF` : blue
+--
+      - (255, 255, 0) = `xFFFF00` : yellow
 
 ---
 ## Raster Graphics
 * define the size of an image (e.g. width = 16 pixels, height = 16 pixels)
 * for each pixel store a color intensity per color-channel  
   (Red Green Blue => RGB) 
-* typically 8 bit (= 1 byte) for each red, green & Blue
+* typically 8 bit (= 1 byte) for each red, green & blue
 * 8 bit represent decimal values from 0 to 255;  
   hexadecimal from 00 to FF
-* 3 * 8-bit = 24 bit = ~ 16 million colors can be mixed
+* 3 x 8-bit = 24 bit = ~ 16 million colors can be mixed
 * size of the uncompressed image data is:  
-  width-in-pixels * height-in-pixels * 24-bit
+  width-in-pixels x height-in-pixels x 24-bit
 
 ---
 ## What is the resolution of a digital image?
@@ -175,12 +177,13 @@ Examples:
 ## What is "dpi" / "ppi"
 * used for printers and displays
 * measures of resolution:
-* dpi: "dots per inch"
-* ppi: "pixels per inch"
-* dpi & ppi can be used interchangeably
+    * dpi: "dots per inch"
+    * ppi: "pixels per inch"
+* dpi & ppi are often used interchangeably
 * relates the resolution of digital data to the display/print size:
 * an image with 600 x 450 pixes printed at 300 dpi  
   will result in the dimensions 2 inches x 1.5 inches
+* <https://en.wikipedia.org/wiki/Pixel>
 
 ---
 ## Different file formats
@@ -244,7 +247,7 @@ Examples:
 .valign_imgs[
 * <img src="./img/smiley-16x16_q90.jpeg" alt="jpeg-smiley 16x16 at 20x Quality 90" title="jpeg-smiley 16x16 at 20x Quality 90" width="320px" height="320px">
 * <img src="./img/smiley-16x16_q80.jpeg" alt="jpeg-smiley 16x16 at 20x Quality 80" title="jpeg-smiley 16x16 at 20x Quality 80" width="320px" height="320px">
-* <img src="./img/smiley-16x16_q50.jpeg" alt="jpeg-smiley 16x16 at 20x Quality 50" title="jpeg-smiley 16x16 at 20x Quality 80" width="320px" height="320px">
+* <img src="./img/smiley-16x16_q50.jpeg" alt="jpeg-smiley 16x16 at 20x Quality 50" title="jpeg-smiley 16x16 at 20x Quality 50" width="320px" height="320px">
 ]
 
 ---
